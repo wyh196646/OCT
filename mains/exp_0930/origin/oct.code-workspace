@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../../projects"
+		},
+		{
+			"path": "../../../../../data/rawdata/OCT/data"
+		}
+	],
+	"settings": {}
+}
