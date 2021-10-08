@@ -19,6 +19,7 @@ def run(config, device=torch.device('cuda')):
     train = config['train']
     batch_size = config['batch_size']
     num_train_epochs = config['num_train_epochs']
+    print(num_train_epochs)
     parallel = config['parallel']
     dataset_class = config['dataset_class']
     model_class = config['model_class']
