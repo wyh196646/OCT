@@ -419,7 +419,6 @@ def calculate_position(arr):
     array_num = np.array(array_num)
     key = np.unique(array_num)
     valid_slice=key
-    #print(100000000)
     result = {}
     for k in key:
         index=np.argwhere(arr == k)#返回所有符合条件的索引值，更多的方法和类参数需要看
