@@ -61,7 +61,6 @@ def run(config, device=torch.device('cuda')):
 
         if train:
 
-
             optimizer = Adam([
                 {'params': model.backbone_parameters(), 'lr':1e-5},
                 {'params': model.head_parameters(), 'lr': 1e-4}
