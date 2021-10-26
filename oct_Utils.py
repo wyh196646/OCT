@@ -418,20 +418,16 @@ def calculate_position(arr):
     array_num = list(itertools.chain.from_iterable(arr))
     array_num = np.array(array_num)
     key = np.unique(array_num)
-    valid_slice=key
     result = {}
     for k in key:
         index=np.argwhere(arr == k)#返回所有符合条件的索引值，更多的方法和类参数需要看
         v=[tuple(index[i]) for i in range(0,len(index))]
         result[k] = v
     result = {key:val for key, val in result.items() if  len(val)<9}
-
     valid_point=[]
     for key,value in result.items():
-        valid_point+=value
-    
-    
-    return result,valid_point,valid_slice
+        valid_point+=value   
+    return result,valid_point
 
 
 def concat_images(images_path:list):

@@ -6,11 +6,9 @@ from torchvision import models
 class OCTVF54Model(nn.Module):
     def __init__(self, config):
         super().__init__()
+        self.loss_fn=nn.MSELoss(reduction='none')
         self.config = config
         self.arch = self.config['arch']
-
-        self.loss_fn = nn.MSELoss(reduction='none')
-
         if self.arch == 'resnet18':
             self.net = models.resnet18(pretrained=True)
             n_out = 512
