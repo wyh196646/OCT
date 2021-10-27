@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from torch._C import device
+from torch.types import Device
 from tqdm import tqdm
 import json
 import cv2
@@ -36,7 +38,6 @@ class OCT_ROI_head(nn.Module):
         super(OCT_ROI_head, self).__init__()
         self.loss_fn=nn.MSELoss(reduction='none')
         self.feature,self.classfier=self.decom_ResNet50()
-        #self.classifier=classifier
         self.vf_pred = nn.Linear(4096, 1)
         self.normal_init(self.vf_pred, 0, 0.01)
         self.roi_size = roi_size
@@ -50,7 +51,7 @@ class OCT_ROI_head(nn.Module):
         roi_indices=np.arange(0,54).reshape(54,-1)
         roi_indices =torch.tensor(roi_indices).float()
         rois = torch.tensor(rois).float()
-        indices_and_rois = torch.cat([roi_indices[:, None], rois], dim=1)
+        indices_and_rois = torch.cat([roi_indices[:, None], rois], dim=1,device=rois.device)
         xy_indices_and_rois = indices_and_rois[:, [0, 2, 1, 4, 3]]
         indices_and_rois=xy_indices_and_rois
         pool = self.roi(x, indices_and_rois)#x是原始特征图，indices是组合以后的anchor
@@ -65,21 +66,21 @@ class OCT_ROI_head(nn.Module):
 
 
     def backbone_parameters(self):
-        return self.feature
+        return self.feature.parameters()
     
     def head_parameters(self):
-        return self.reg_layer
+        return self.classfier.parameters()
 
-    def decom_ResNet50():
+    def decom_ResNet50(self):
         model=models.resnet50(pretrained=True)
-        feature=nn.Sequential(**list(model.children()[:-3]))
+        feature=nn.Sequential(*list(model.children())[:-3])
         reg_layer=nn.Sequential(
             nn.Linear(512*7*7,4096)#输出的feature是1000,根据Resnet网络结构分析出来的维度
         )
         return feature,reg_layer
 
 
-    def normal_init(m, mean, stddev, truncated=False):
+    def normal_init(self,m, mean, stddev, truncated=False):
         """
         weight initalizer: truncated normal and random normal.
         """

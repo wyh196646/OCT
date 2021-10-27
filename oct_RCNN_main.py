@@ -10,7 +10,7 @@ sys.path.append(str(Path('.').absolute()))
 
 from oct_vf_dataset import OCTVFDataset
 
-from runner54 import *
+from oct_RCNN_runner import *
 from record_processors import *
 #from OCT_54_dataset import OCT_54_Dataset
 #from OCT_54_vf_model import OCTVF54Model
@@ -27,17 +27,14 @@ if __name__ == '__main__':
         'num_train_epochs': 50,
         'parallel': True,
         'mode':'train',
-        'label_col':'value',
+        'label_col':'num',
         'train':True,
-        'dataset_class': OCT_ROI_head,
-        'model_class': OCT_RCNN_Dataset,
+        'dataset_class': OCT_RCNN_Dataset,
+        'model_class': OCT_ROI_head,
         'crop_size': 320,
-        'self.col_name':'value',
-        'image_root': Path('/home/octusr3/project/data_fast/54'),
-
-
+        'image_root': Path('/home/octusr3/project/data_fast/380'),
         'map_matrix':'''[ [0  0  0  0  0  0  0  0  0  0]
-                        [0  0  0  46 44 43 42 0  0  0]s
+                        [0  0  0  46 44 43 42 0  0  0]
                         [0  0  46 45 44 43 41 43 0  0]
                         [0  45 46 45 45 45 42 42 41 0]
                         [46 46 47 46 50 50 50 3  41 0]

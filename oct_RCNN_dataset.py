@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pyexpat import model
 from pandas.core.frame import DataFrame
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
@@ -9,20 +10,20 @@ import pandas as pd
 from oct_Utils import *
 
 
+
+
 @dataclass
 class OCT_RCNN_Dataset(Dataset):
 
     data:pd.DataFrame
     mode:str
     config:dict
-    #total_slice:int
+
 
     def __post_init__(self):
-
         self.crop_size=self.config['crop_size']
         self.image_root=self.config['image_root']
         self.label_col=self.config['label_col']
-        self.mode=self.mode
         self.trans = {
             'train': transforms.Compose([
                 transforms.Resize([224,224]),
@@ -64,12 +65,11 @@ class OCT_RCNN_Dataset(Dataset):
             mat = np.flip(mat, axis=1)
         return mat
 
-    def generate_vf_proposal(config):
-
+    def generate_vf_proposal(self):
         '''
         这里需要对边界框作复映射，以此来保证最终proposal区域够54个点
         '''
-        vf_dict,_=calculate_position(str_to_np_mat(config['map_matrix']))
+        vf_dict,_=calculate_position(str_to_np_mat(self.config['map_matrix']))
         valid_slice=[]
         valid_position=[]
         for key,value in vf_dict.items():
@@ -85,7 +85,7 @@ class OCT_RCNN_Dataset(Dataset):
         #return valid_slice,这里-1 是因为slice标记是1-54,映射到anchor序列应该是0-53
         return proposal[np.array((valid_slice),dtype=int)-1],valid_slice,valid_position#提取出有效proposal区域
 
-    def get_proposal_label(mat,valid_position):
+    def get_proposal_label(self,mat,valid_position):
         #根据序列标识进行测试，最终得到的结果
         #坐标的序列都是从0-9，所以 直接映射就可以
         res=[]
@@ -100,7 +100,7 @@ class OCT_RCNN_Dataset(Dataset):
         img = self.read_image(str(self.image_root / self.data.loc[self.data.index[idx], 'image_path']))
         #label = self.data.loc[self.data.index[idx],self.label_col]
         label=self.read_np_mat(idx,self.label_col)
-        proposal,valid_slice,valid_position=self.generate_vf_proposal(self.config)
+        proposal,valid_slice,valid_position=self.generate_vf_proposal()#直接通过类属性访问即可
         label=self.get_proposal_label(label,valid_position)
         result = {
             'img': img,
@@ -109,6 +109,44 @@ class OCT_RCNN_Dataset(Dataset):
         }
         return result
     
+if __name__ == '__main__':
+    df = pd.read_csv('/home/octusr3/project/oct/data.csv')
+
+    config = {
+        'crop_size': 320,
+        'image_root': Path('/home/octusr2/projects/data_fast/proceeded/cp_projection/380'),
+        'label_col': 'num',
+        'valid_mask': '''[[0 0 0 0 0 0 0 0 0 0]
+                        [0 0 0 1 1 1 1 0 0 0]
+                        [0 0 1 1 1 1 1 1 0 0]
+                        [0 1 1 1 1 1 1 1 1 0]
+                        [1 1 1 1 1 1 1 1 1 0]
+                        [1 1 1 1 1 1 1 1 1 0]
+                        [0 1 1 1 1 1 1 1 1 0]
+                        [0 0 1 1 1 1 1 1 0 0]
+                        [0 0 0 1 1 1 1 0 0 0]
+                        [0 0 0 0 0 0 0 0 0 0]]'''
+    }
+    ds = OCT_RCNN_Dataset(df, 'train', config)
+    # for batch in ds:
+    #     img = batch['img']
+    #     img_path = batch['img_path']
+    #     label = batch['label']
+    #     pass
+    
+    print(ds)
+    print('===========')
+
+
+
+
+
+
+
+
+
+
+
 
 
 

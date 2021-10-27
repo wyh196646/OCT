@@ -19,7 +19,7 @@ def run(config, device=torch.device('cuda')):
     train = config['train']
     batch_size = config['batch_size']
     num_train_epochs = config['num_train_epochs']
-    print(num_train_epochs)
+    #print(num_train_epochs)
     parallel = config['parallel']
     dataset_class = config['dataset_class']
     model_class = config['model_class']
@@ -27,16 +27,15 @@ def run(config, device=torch.device('cuda')):
     task_path = f'{task}/exp-{id_base}'
     task_file_path = f'output/{task_path}/tasks/data.csv'
     df = pd.read_csv(task_file_path, low_memory=False)
-    #print(df)
     results = defaultdict(list)
     for fold in folds:
         print(f'task={task}, id_base={id_base}, fold={fold}')
         name = f"{task}-exp-{id_base}-fold{fold}"
-
         train_df = df[(df['dataset'] != (fold - 1) % 5) & (df['dataset'] != fold)].copy()
         valid_df = df[(df['dataset'] == (fold - 1) % 5)].copy()
         test_df = df[(df['dataset'] == fold)].copy()
-
+        #print(train_df)
+        #print('-------------',len([train_df, 'train', config]))
         train_ds = dataset_class(train_df, 'train', config)
         valid_ds = dataset_class(valid_df, 'valid', config)
         test_ds = dataset_class(test_df, 'test', config)
