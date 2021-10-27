@@ -77,10 +77,11 @@ def run(config, device=torch.device('cuda')):
                     with tqdm(train_dl, leave=False, file=sys.stdout) as t:
                         for batch in t:
                             img = batch['img'].to(device)
+                            proposal=batch['proposal'].to(device)
                             label = batch['label'].to(device).unsqueeze(1)
                             #label = label.unsqueeze(1)
                             optimizer.zero_grad()
-                            y, loss = model_for_train(img, label)
+                            y, loss = model_for_train(img,proposal,label)
                             loss_bp=torch.mean(loss)    
                             loss_bp.backward()
                             optimizer.step()
@@ -91,10 +92,11 @@ def run(config, device=torch.device('cuda')):
                         with tqdm(valid_dl, leave=False, file=sys.stdout) as t:
                             for batch in t:
                                 img = batch['img'].to(device)
+                                proposal=batch['proposal'].to(device)
                                 label = batch['label'].to(device).unsqueeze(1)
                                 optimizer.zero_grad()#用验证集来评估模型的好坏，最后test做结果
                                 loss_bp = torch.mean(loss)
-                                y, loss= model_for_train(img, label)
+                                y, loss= model_for_train(img,proposal,label)
                                 records['valid-loss-list'].append([float(loss_bp)])
               
                     to_print = []
@@ -118,8 +120,9 @@ def run(config, device=torch.device('cuda')):
                 with tqdm(test_dl, leave=False, file=sys.stdout) as t:
                     for batch in t:
                         img = batch['img'].to(device)
+                        proposal=batch['proposal'].to(device)
                         y, _ = model_for_train(img)
-                        preds.append(y.cpu().numpy())
+                        preds.append(y.squeeze().cpu().numpy())
             preds=np.concatenate(preds,axis=0)   
             test_df_tmp['pred'] = preds
             results[saver.key].append(test_df_tmp)

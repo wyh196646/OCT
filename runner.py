@@ -86,7 +86,7 @@ def run(config, device=torch.device('cuda')):
                             loss_weights = batch['loss_weights'].to(device)
                             optimizer.zero_grad()
                             y, loss, _ = model_for_train(img, label, loss_weights)
-                            loss_bp = torch.mean(loss)
+                            loss_bp = torch.mean(loss)#这里是相当于两个方向上都取了平均值
                             loss_bp.backward()
                             optimizer.step()
                             t.set_postfix(loss=float(loss_bp))

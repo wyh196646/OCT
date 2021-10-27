@@ -18,8 +18,7 @@ class OCT_RCNN_Dataset(Dataset):
     #total_slice:int
 
     def __post_init__(self):
-        #self.countNums,_=calculate_position(str_to_np_mat(self.config['map_matrix']))
-        #self.point_to_image_slice=reverse_dict(self.countNums)
+
         self.crop_size=self.config['crop_size']
         self.image_root=self.config['image_root']
         self.label_col=self.config['label_col']
@@ -78,13 +77,12 @@ class OCT_RCNN_Dataset(Dataset):
                 valid_slice.append(key)
                 valid_position.append(tem)
             #valid_slice.append(len(value)*[key])已经扩充到了54点，中间包含重复值的slice
-        
         centre_point_x=np.linspace((224/54)/2,224-(224/54)/2,54)
         centre_point_y=np.repeat(112,54)
         w,h=224/54,224
         temp=[(centre_point_y-h/2).reshape(54,-1),(centre_point_x-w/2).reshape(54,-1),(centre_point_y+h/2).reshape(54,-1),(centre_point_x+w/2).reshape(54,-1)]
         proposal=np.concatenate(temp,axis=1)
-        #return valid_slice
+        #return valid_slice,这里-1 是因为slice标记是1-54,映射到anchor序列应该是0-53
         return proposal[np.array((valid_slice),dtype=int)-1],valid_slice,valid_position#提取出有效proposal区域
 
     def get_proposal_label(mat,valid_position):
@@ -106,7 +104,7 @@ class OCT_RCNN_Dataset(Dataset):
         label=self.get_proposal_label(label,valid_position)
         result = {
             'img': img,
-            'proposal':proposal,#生成的有效坐标框区域
+            'proposal':proposal,#生成的有效坐标框区域,label是坐标对应的框
             'label': torch.tensor(label, dtype=torch.float),
         }
         return result

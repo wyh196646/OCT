@@ -32,12 +32,11 @@ from torchsummary import summary
 
 class OCT_ROI_head(nn.Module):
 
-    def __init__(self,config,classifier,roi_size=7, spatial_scale=16):
+    def __init__(self,roi_size=7, spatial_scale=16):
         super(OCT_ROI_head, self).__init__()
         self.loss_fn=nn.MSELoss(reduction='none')
-        self.config = config
-        self.feature,self.reg_layer=self.decom_ResNet50()
-        self.classifier=classifier
+        self.feature,self.classfier=self.decom_ResNet50()
+        #self.classifier=classifier
         self.vf_pred = nn.Linear(4096, 1)
         self.normal_init(self.vf_pred, 0, 0.01)
         self.roi_size = roi_size
@@ -46,9 +45,10 @@ class OCT_ROI_head(nn.Module):
     
         #一次取batch_size大小的数据方式有待进一步学习Pytorch的代码，理清结构，才能平衡batch的关系
         #仍然要读旧的代码
-    def forward(self, x, rois, roi_indices,label=None):
+    def forward(self,img, rois,label=None):
+        x=self.feature(img)
+        roi_indices=np.arange(0,54).reshape(54,-1)
         roi_indices =torch.tensor(roi_indices).float()
-        roi=np.arange(0,54).reshape(54,-1)
         rois = torch.tensor(rois).float()
         indices_and_rois = torch.cat([roi_indices[:, None], rois], dim=1)
         xy_indices_and_rois = indices_and_rois[:, [0, 2, 1, 4, 3]]
