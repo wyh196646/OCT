@@ -44,7 +44,7 @@ def run(config, device=torch.device('cuda')):
         valid_dl = DataLoader(valid_ds, sampler=SequentialSampler(valid_ds), batch_size=batch_size, num_workers=32)
         test_dl = DataLoader(test_ds, sampler=SequentialSampler(test_ds), batch_size=batch_size, num_workers=32)
 
-        model = model_class(config)
+        model = model_class()
         model = model.to(device)
 
         if parallel:
@@ -78,8 +78,9 @@ def run(config, device=torch.device('cuda')):
                             img = batch['img'].to(device)
                             proposal=batch['proposal'].to(device)
                             label = batch['label'].to(device).unsqueeze(1)
-                            #label = label.unsqueeze(1)
+
                             optimizer.zero_grad()
+                            
                             y, loss = model_for_train(img,proposal,label)
                             loss_bp=torch.mean(loss)    
                             loss_bp.backward()
