@@ -127,11 +127,13 @@ if __name__ == '__main__':
                         [0 0 0 0 0 0 0 0 0 0]]'''
     }
     ds = OCT_RCNN_Dataset(df, 'train', config)
-    # for batch in ds:
-    #     img = batch['img']
-    #     img_path = batch['img_path']
-    #     label = batch['label']
-    #     pass
+    for batch in ds:
+        img = batch['img']
+        img_path = batch['img_path']
+        label = batch['label']
+        print(label.shape)
+        
+        pass
     
     print(ds)
     print('===========')

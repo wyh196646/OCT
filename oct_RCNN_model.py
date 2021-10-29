@@ -70,10 +70,12 @@ class OCT_ROI_head(nn.Module):
         vf_predicted_value = self.vf_pred(fc7)#vf_predicted_value的维度：54*1 proposal数量决定的第一维度
         #所以尽量让这里的label进行维度匹配
         #vf_predicted_value=vf_predicted_value.squeeze(1)
-        #label=label.squeeze(1)
+        
         loss=None
         if label is not None:
+            label=label.squeeze(1)
             loss=self.loss_fn(vf_predicted_value,label)#仍旧相当于一次性预测了原有的54个点
+        #print(loss.shape)
         return vf_predicted_value,loss#标记输出维度是一个非常好的方法，有助于理清思路，快速带入代码
 
 

@@ -59,11 +59,14 @@ def run(config, device=torch.device('cuda')):
 
         if train:
 
+            # optimizer = Adam([
+            #     {'params': model.backbone_parameters(), 'lr':1e-5},
+            #     {'params': model.head_parameters(), 'lr': 1e-4}
+            # ], weight_decay=0.01)
             optimizer = Adam([
-                {'params': model.backbone_parameters(), 'lr':1e-5},
-                {'params': model.head_parameters(), 'lr': 1e-4}
+                {'params': model.backbone_parameters(), 'lr':1e-2},
+                {'params': model.head_parameters(), 'lr': 1e-2}
             ], weight_decay=0.01)
-
             scheduler = lr_scheduler.StepLR(optimizer, step_size=batch_size // 2, gamma=0.1)
 
             for epoch in range(num_train_epochs):
@@ -76,7 +79,7 @@ def run(config, device=torch.device('cuda')):
                         for batch in t:
                             img = batch['img'].to(device)
                             proposal=batch['proposal'].to(device)
-                            label = batch['label'].to(device)#.unsqueeze(1)
+                            label = batch['label'].to(device).unsqueeze(1)
                             optimizer.zero_grad()
                             y, loss = model_for_train(img,proposal,label)
                             loss_bp=torch.mean(loss)    
@@ -118,9 +121,12 @@ def run(config, device=torch.device('cuda')):
                     for batch in t:
                         img = batch['img'].to(device)
                         proposal=batch['proposal'].to(device)
-                        y, _ = model_for_train(img)
-                        preds.append(y.squeeze().cpu().numpy())
-            preds=np.concatenate(preds,axis=0)   
+                        y, _ = model_for_train(img,proposal)
+                        #print(y.shape)
+                        preds.append(y.squeeze().cpu().numpy()) 
+            
+            preds=np.concatenate(preds,axis=0)  
+            preds = [str(x) for x in preds] 
             test_df_tmp['pred'] = preds
             results[saver.key].append(test_df_tmp)
         model_for_train.to(cpu)

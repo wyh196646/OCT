@@ -22,7 +22,7 @@ if __name__ == '__main__':
         'id_base': 'pid',
         'processors': [train_loss, valid_loss], 
         'savers_init': [('valid-loss', min)],
-        'batch_size': 512,
+        'batch_size': 256,
         'num_train_epochs': 50,
         'parallel': True,
         'mode':'train',
