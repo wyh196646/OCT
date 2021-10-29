@@ -1,6 +1,6 @@
 from operator import imod
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="4,5,6,7"
 
 
 from pathlib import Path
@@ -12,8 +12,7 @@ from oct_vf_dataset import OCTVFDataset
 
 from oct_RCNN_runner import *
 from record_processors import *
-#from OCT_54_dataset import OCT_54_Dataset
-#from OCT_54_vf_model import OCTVF54Model
+
 from oct_RCNN_model import OCT_ROI_head
 from oct_RCNN_dataset import OCT_RCNN_Dataset
 

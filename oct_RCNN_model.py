@@ -61,7 +61,7 @@ class OCT_ROI_head(nn.Module):
         #print(rois.shape)#重新调配维度
         indices_and_rois = torch.cat([roi_indices, rois], dim=2).to(rois.device)#注意这个rois_indice[: ,None]会升维
         xy_indices_and_rois = indices_and_rois[:, [0, 2, 1, 4, 3]].to(rois.device)
-        indices_and_rois=xy_indices_and_rois.to(rois.device,dtype=torch.float) #batch*54*4
+        indices_and_rois=xy_indices_and_rois.to(rois.device,dtype=torch.float) #batch*54*4和batch*54*1进行合并
         pool = self.roi(x, indices_and_rois)#x是原始特征图，indices是组合以后的anchor
         #print(pool.shape)
         pool=pool.view(pool.size(0),-1)# batchsize*54*512*7*7  
@@ -70,7 +70,7 @@ class OCT_ROI_head(nn.Module):
         vf_predicted_value = self.vf_pred(fc7)#vf_predicted_value的维度：54*1 proposal数量决定的第一维度
         #所以尽量让这里的label进行维度匹配
         #vf_predicted_value=vf_predicted_value.squeeze(1)
-        label=label.squeeze(1)
+        #label=label.squeeze(1)
         loss=None
         if label is not None:
             loss=self.loss_fn(vf_predicted_value,label)#仍旧相当于一次性预测了原有的54个点

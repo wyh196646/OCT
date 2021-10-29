@@ -29,7 +29,6 @@ class OCT_RCNN_Dataset(Dataset):
                 transforms.Resize([224,224]),
                 transforms.ColorJitter(brightness=0.3),
                 transforms.Grayscale(num_output_channels=3),
-                #transforms.RandomCrop((self.crop_size, self.crop_size)),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],
                                      [0.229, 0.224, 0.225])
@@ -98,7 +97,7 @@ class OCT_RCNN_Dataset(Dataset):
     def __getitem__(self, idx):
         all_columns_name=self.data.columns.values
         img = self.read_image(str(self.image_root / self.data.loc[self.data.index[idx], 'image_path']))
-        #label = self.data.loc[self.data.index[idx],self.label_col]
+       
         label=self.read_np_mat(idx,self.label_col)
         proposal,valid_slice,valid_position=self.generate_vf_proposal()#直接通过类属性访问即可
         label=self.get_proposal_label(label,valid_position)

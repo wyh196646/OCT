@@ -34,8 +34,7 @@ def run(config, device=torch.device('cuda')):
         train_df = df[(df['dataset'] != (fold - 1) % 5) & (df['dataset'] != fold)].copy()
         valid_df = df[(df['dataset'] == (fold - 1) % 5)].copy()
         test_df = df[(df['dataset'] == fold)].copy()
-        #print(train_df)
-        #print('-------------',len([train_df, 'train', config]))
+
         train_ds = dataset_class(train_df, 'train', config)
         valid_ds = dataset_class(valid_df, 'valid', config)
         test_ds = dataset_class(test_df, 'test', config)
@@ -77,10 +76,8 @@ def run(config, device=torch.device('cuda')):
                         for batch in t:
                             img = batch['img'].to(device)
                             proposal=batch['proposal'].to(device)
-                            label = batch['label'].to(device).unsqueeze(1)
-
+                            label = batch['label'].to(device)#.unsqueeze(1)
                             optimizer.zero_grad()
-                            
                             y, loss = model_for_train(img,proposal,label)
                             loss_bp=torch.mean(loss)    
                             loss_bp.backward()
