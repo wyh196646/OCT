@@ -45,33 +45,44 @@ class OCT_ROI_head(nn.Module):
         
         #一次取batch_size大小的数据方式有待进一步学习Pytorch的代码，理清结构，才能平衡batch的关系
         #仍然要读旧的代码
-    def forward(self,img, rois,roi_size_h_ratio=0.25,roi_size_w_ratio=0.25,label=None):#先按照输出维度roi_size=16来进行调整
+    def forward(self,img,rois,label=None,roi_size_h_ratio=0.25,roi_size_w_ratio=0.25):#先按照输出维度roi_size=16来进行调整,64相对于16的下采样倍率是4倍，所以系数是0.25
         x=self.feature(img)
         n,_,hh,ww=x.shape#n就是batch_size，所以在写模型的的时候都要考虑到batchsize的维度
-        self.roi_h_size=hh*roi_size_h_ratio
-        self.roi_w_size=ww*roi_size_w_ratio
+        self.roi_h_size=int(hh*roi_size_h_ratio)
+        self.roi_w_size=int(ww*roi_size_w_ratio)
         self.roi = RoIPool((self.roi_h_size, self.roi_w_size),1./self.spatial_scale)
-    
+        #print(rois.shape)
+        #rois=rois.view(-1,4)
+        #print("---------------------------")
         roi_indices=list()
         for i in range(n):#整合roi_indices是一个需要理解的过程，框的维度 batch*54*4，roi_indices就应该是batch*54*1，所以比如第一个batch数据，就要有一个54*1大小的全1矩阵来拼接才可以
             batch_index = i * np.ones((54,), dtype=np.int32)#所以下面的代码可以work
             roi_indices.append(batch_index)
         roi_indices = torch.tensor(np.concatenate(roi_indices, axis=0)).to(rois.device)
-
-        roi_indices=roi_indices.view(n,54,1)#128*54
+        rois=rois.view(-1,4)
+        roi_indices=roi_indices.view(n*54,1)#128*54
         #print(roi_indices.shape)
         #print(rois.shape)#重新调配维度
-        indices_and_rois = torch.cat([roi_indices, rois], dim=2).to(rois.device)#注意这个rois_indice[: ,None]会升维
+        # print(roi_indices.shape)
+        # print('-----')
+        # print(rois.shape)
+        indices_and_rois = torch.cat([roi_indices, rois], dim=1).to(rois.device)#注意这个rois_indice[: ,None]会升维
+        #print(indices_and_rois.shape)
         #indices_and_rois=xy_indices_and_rois.to(rois.device,dtype=torch.float) #batch*54*4和batch*54*1进行合并
+        #print(x.shape)
+        indices_and_rois=indices_and_rois.to(indices_and_rois.device,dtype=torch.float)#为了保持数据类型一致，不然就会
+        #Expected tensor for argument #1 'input' to have the same type as tensor for argument #2 'rois'; but type torch.cuda.FloatTensor does not equal torch.cuda.DoubleTensor (while checking arguments for roi_pool_forward_kernel)
         pool = self.roi(x, indices_and_rois)#x是原始特征图，indices是组合以后的anchor，输出的维度应该是batchsize*54*channel*roi_size*roi_size,所以要适配后面的问题
-        pool=pool.view(pool.shape[0]*54,512,self.roi_h_size,roi_size_w_ratio)# batchsize*54*512*7*7 ，这里进行维度修正
+        pool=pool.reshape(pool.shape[0]*54,512,self.roi_h_size,roi_size_w_ratio)# batchsize*54*512*7*7 ，这里进行维度修正
+        print(pool.size)
         pool=self.behind_layer(pool).squeeze()
-        
-        fc7 = self.classfier(pool)
+        print('-------------------------------')
+        print(pool.size)
+        vf_predicted_value = self.classfier(pool)#这里的输出维度是  (batchsize*54,output_value)
         #vf_predicted_value = self.vf_pred(fc7)#vf_predicted_value的维度：54*1 proposal数量决定的第一维度
         #所以尽量让这里的label进行维度匹配
         #vf_predicted_value=vf_predicted_value.squeeze(1)
-        
+        vf_predicted_value=vf_predicted_value.view(-1,54)
         loss=None
         if label is not None:
             label=label.squeeze(1)
@@ -82,9 +93,14 @@ class OCT_ROI_head(nn.Module):
 
     def backbone_parameters(self):
         return self.feature.parameters()
-    
+
+    def reg_parameters(self):
+        return self.behind_layer.parameters()
+    #self.behind_layer
     def head_parameters(self):
         return self.classfier.parameters()
+    
+
 
     
     def decom_ResNet50(self):
@@ -94,7 +110,7 @@ class OCT_ROI_head(nn.Module):
             #输出的feature是1000,根据Resnet网络结构分析出来的维度
             *list(model.children())[-4:-1]
         )
-        reg_layer=nn.Linear(2048,54)
+        reg_layer=nn.Linear(2048,1)
         return feature,behind_layer,reg_layer
     #a,b,c=decom_ResNet50()
 

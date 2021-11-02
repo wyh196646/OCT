@@ -31,9 +31,9 @@ def run(config, device=torch.device('cuda')):
     for fold in folds:
         print(f'task={task}, id_base={id_base}, fold={fold}')
         name = f"{task}-exp-{id_base}-fold{fold}"
-        train_df = df[(df['dataset'] != (fold - 1) % 5) & (df['dataset'] != fold)].copy()
-        # valid_df=train_df
-        valid_df = df[(df['dataset'] == (fold - 1) % 5)].copy()
+        train_df = df[(df['dataset'] != (fold - 1) % 5) & (df['dataset'] != fold)].copy().iloc[0:10]
+        valid_df=train_df
+        #valid_df = df[(df['dataset'] == (fold - 1) % 5)].copy()
         test_df = df[(df['dataset'] == fold)].copy()
 
         train_ds = dataset_class(train_df, 'train', config)
@@ -82,7 +82,7 @@ def run(config, device=torch.device('cuda')):
                             proposal=batch['proposal'].to(device)
                             label = batch['label'].to(device).unsqueeze(1)
                             optimizer.zero_grad()
-                            y, loss = model_for_train(img,proposal,label)
+                            y, loss = model_for_train(img,proposal,label=label)
                             loss_bp=torch.mean(loss)    
                             loss_bp.backward()
                             optimizer.step()
@@ -97,7 +97,7 @@ def run(config, device=torch.device('cuda')):
                                 label = batch['label'].to(device).unsqueeze(1)
                                 optimizer.zero_grad()#用验证集来评估模型的好坏，最后test做结果
                                 loss_bp = torch.mean(loss)
-                                y, loss= model_for_train(img,proposal,label)
+                                y, loss= model_for_train(img,proposal,label=label)
                                 records['valid-loss-list'].append([float(loss_bp)])
               
                     to_print = []
