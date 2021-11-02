@@ -73,12 +73,13 @@ class OCT_ROI_head(nn.Module):
         indices_and_rois=indices_and_rois.to(indices_and_rois.device,dtype=torch.float)#为了保持数据类型一致，不然就会
         #Expected tensor for argument #1 'input' to have the same type as tensor for argument #2 'rois'; but type torch.cuda.FloatTensor does not equal torch.cuda.DoubleTensor (while checking arguments for roi_pool_forward_kernel)
         pool = self.roi(x, indices_and_rois)#x是原始特征图，indices是组合以后的anchor，输出的维度应该是batchsize*54*channel*roi_size*roi_size,所以要适配后面的问题
-        pool=pool.reshape(pool.shape[0]*54,512,self.roi_h_size,roi_size_w_ratio)# batchsize*54*512*7*7 ，这里进行维度修正
-        print(pool.size)
+        #print(pool.shape)
+        #pool=torch.reshape(pool,(pool.shape[0],512,self.roi_h_size,self.roi_w_size))# batchsize*54*512*7*7 ，这里进行维度修正
+        #print(pool.size)
         pool=self.behind_layer(pool).squeeze()
-        print('-------------------------------')
-        print(pool.size)
-        vf_predicted_value = self.classfier(pool)#这里的输出维度是  (batchsize*54,output_value)
+        #print('-------------------------------')
+        #print(pool.size)
+        vf_predicted_value = self.classfier(pool)#这里的输出维度是  (batchsize*54,output_value其实就是1)
         #vf_predicted_value = self.vf_pred(fc7)#vf_predicted_value的维度：54*1 proposal数量决定的第一维度
         #所以尽量让这里的label进行维度匹配
         #vf_predicted_value=vf_predicted_value.squeeze(1)

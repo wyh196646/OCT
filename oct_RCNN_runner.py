@@ -65,11 +65,11 @@ def run(config, device=torch.device('cuda')):
             #     {'params': model.head_parameters(), 'lr': 1e-4}
             # ], weight_decay=0.01)
             optimizer = Adam([
-                {'params': model.backbone_parameters(), 'lr':1e-0},
-                {'params': model.head_parameters(), 'lr': 1e-0}
+                {'params': model.backbone_parameters(), 'lr':1e-1},
+                {'params': model.head_parameters(), 'lr': 1e-1},
+                {'params': model.head_parameters,'lr':1e-1}
             ], weight_decay=0.01)
-            scheduler = lr_scheduler.StepLR(optimizer, step_size=50,gamma=0.1)#batch_size // 2, gamma=0.1)
-            #scheduler = lr_scheduler.ExponentialLR(optimizer,gamma=0.98)
+            scheduler = lr_scheduler.StepLR(optimizer, step_size=10,gamma=0.1)#batch_size // 2, gamma=0.1)
             for epoch in range(num_train_epochs):
                 with Benchmark(f'Epoch {epoch}'):
                     records['epoch'] = epoch
