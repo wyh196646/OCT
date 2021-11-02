@@ -31,9 +31,9 @@ def run(config, device=torch.device('cuda')):
     for fold in folds:
         print(f'task={task}, id_base={id_base}, fold={fold}')
         name = f"{task}-exp-{id_base}-fold{fold}"
-        train_df = df[(df['dataset'] != (fold - 1) % 5) & (df['dataset'] != fold)].copy().iloc[0:10]
-        valid_df=train_df
-        #valid_df = df[(df['dataset'] == (fold - 1) % 5)].copy()
+        train_df = df[(df['dataset'] != (fold - 1) % 5) & (df['dataset'] != fold)].copy()#.iloc[0:10]
+        #valid_df=train_df
+        valid_df = df[(df['dataset'] == (fold - 1) % 5)].copy()
         test_df = df[(df['dataset'] == fold)].copy()
 
         train_ds = dataset_class(train_df, 'train', config)
@@ -67,9 +67,10 @@ def run(config, device=torch.device('cuda')):
             optimizer = Adam([
                 {'params': model.backbone_parameters(), 'lr':1e-1},
                 {'params': model.head_parameters(), 'lr': 1e-1},
-                {'params': model.head_parameters,'lr':1e-1}
+                {'params': model.reg_parameters(),'lr':1e-1}
             ], weight_decay=0.01)
-            scheduler = lr_scheduler.StepLR(optimizer, step_size=10,gamma=0.1)#batch_size // 2, gamma=0.1)
+            #scheduler = lr_scheduler.StepLR(optimizer, step_size=10,gamma=0.1)#batch_size // 2, gamma=0.1)
+            scheduler=lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_train_epochs, eta_min=1e-5)
             for epoch in range(num_train_epochs):
                 with Benchmark(f'Epoch {epoch}'):
                     records['epoch'] = epoch
