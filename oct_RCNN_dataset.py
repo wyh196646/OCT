@@ -24,9 +24,10 @@ class OCT_RCNN_Dataset(Dataset):
         self.crop_size=self.config['crop_size']
         self.image_root=self.config['image_root']
         self.label_col=self.config['label_col']
+        self.image_size=self.config['image_size']
         self.trans = {
             'train': transforms.Compose([
-                transforms.Resize([224,224]),
+                #transforms.Resize([224,224]),
                 transforms.ColorJitter(brightness=0.3),
                 transforms.Grayscale(num_output_channels=3),
                 transforms.ToTensor(),
@@ -34,14 +35,14 @@ class OCT_RCNN_Dataset(Dataset):
                                      [0.229, 0.224, 0.225])
             ]),
             'valid': transforms.Compose([
-                transforms.Resize([224,224]),
+                #transforms.Resize([224,224]),
                 transforms.Grayscale(num_output_channels=3),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],
                                      [0.229, 0.224, 0.225])
             ]),
             'test': transforms.Compose([
-                transforms.Resize([224,224]),
+                #transforms.Resize([224,224]),
                 transforms.Grayscale(num_output_channels=3),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],
@@ -74,12 +75,11 @@ class OCT_RCNN_Dataset(Dataset):
         for key,value in vf_dict.items():
             for tem in value:
                 valid_slice.append(key)
-                valid_position.append(tem)
-            #valid_slice.append(len(value)*[key])已经扩充到了54点，中间包含重复值的slice
-        centre_point_x=np.linspace((224/54)/2,224-(224/54)/2,54)
-        centre_point_y=np.repeat(112,54)
-        w,h=224/54,224
-        temp=[(centre_point_y-h/2).reshape(54,-1),(centre_point_x-w/2).reshape(54,-1),(centre_point_y+h/2).reshape(54,-1),(centre_point_x+w/2).reshape(54,-1)]
+                valid_position.append(tem)#valid_slice.append(len(value)*[key])已经扩充到了54点，中间包含重复值的slice
+        centre_point_x=np.linspace((self.image_size/54)/2,self.image_size-(self.image_size/54)/2,54)
+        centre_point_y=np.repeat(self.image_size/2,54)
+        w,h=self.image_size/54,self.image_size
+        temp=[(centre_point_x-w/2).reshape(54,-1),(centre_point_y-h/2).reshape(54,-1),(centre_point_x+w/2).reshape(54,-1),(centre_point_y+h/2).reshape(54,-1)]
         proposal=np.concatenate(temp,axis=1)
         #return valid_slice,这里-1 是因为slice标记是1-54,映射到anchor序列应该是0-53
         return proposal[np.array((valid_slice),dtype=int)-1],valid_slice,valid_position#提取出有效proposal区域
@@ -108,35 +108,35 @@ class OCT_RCNN_Dataset(Dataset):
         }
         return result
     
-if __name__ == '__main__':
-    df = pd.read_csv('/home/octusr3/project/oct/data.csv')
+# if __name__ == '__main__':
+#     df = pd.read_csv('/home/octusr3/project/oct/data.csv')
 
-    config = {
-        'crop_size': 320,
-        'image_root': Path('/home/octusr2/projects/data_fast/proceeded/cp_projection/380'),
-        'label_col': 'num',
-        'valid_mask': '''[[0 0 0 0 0 0 0 0 0 0]
-                        [0 0 0 1 1 1 1 0 0 0]
-                        [0 0 1 1 1 1 1 1 0 0]
-                        [0 1 1 1 1 1 1 1 1 0]
-                        [1 1 1 1 1 1 1 1 1 0]
-                        [1 1 1 1 1 1 1 1 1 0]
-                        [0 1 1 1 1 1 1 1 1 0]
-                        [0 0 1 1 1 1 1 1 0 0]
-                        [0 0 0 1 1 1 1 0 0 0]
-                        [0 0 0 0 0 0 0 0 0 0]]'''
-    }
-    ds = OCT_RCNN_Dataset(df, 'train', config)
-    for batch in ds:
-        img = batch['img']
-        img_path = batch['img_path']
-        label = batch['label']
-        print(label.shape)
+#     config = {
+#         'crop_size': 320,
+#         'image_root': Path('/home/octusr2/projects/data_fast/proceeded/cp_projection/380'),
+#         'label_col': 'num',
+#         'valid_mask': '''[[0 0 0 0 0 0 0 0 0 0]
+#                         [0 0 0 1 1 1 1 0 0 0]
+#                         [0 0 1 1 1 1 1 1 0 0]
+#                         [0 1 1 1 1 1 1 1 1 0]
+#                         [1 1 1 1 1 1 1 1 1 0]
+#                         [1 1 1 1 1 1 1 1 1 0]
+#                         [0 1 1 1 1 1 1 1 1 0]
+#                         [0 0 1 1 1 1 1 1 0 0]
+#                         [0 0 0 1 1 1 1 0 0 0]
+#                         [0 0 0 0 0 0 0 0 0 0]]'''
+#     }
+#     ds = OCT_RCNN_Dataset(df, 'train', config)
+#     for batch in ds:
+#         img = batch['img']
+#         img_path = batch['img_path']
+#         label = batch['label']
+#         print(label.shape)
         
-        pass
+#         pass
     
-    print(ds)
-    print('===========')
+#     print(ds)
+#     print('===========')
 
 
 

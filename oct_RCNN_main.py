@@ -8,7 +8,7 @@ import sys
 sys.path.append(str(Path('.').absolute()))
 #sys.path.append("..")
 
-from oct_vf_dataset import OCTVFDataset
+
 
 from oct_RCNN_runner import *
 from record_processors import *
@@ -18,7 +18,7 @@ from oct_RCNN_dataset import OCT_RCNN_Dataset
 
 if __name__ == '__main__':
     config = {
-        'task': '1026/disc_num_r50_380',
+        'task': '1102/disc_num_r50_380',
         'id_base': 'pid',
         'processors': [train_loss, valid_loss], 
         'savers_init': [('valid-loss', min)],
@@ -28,10 +28,11 @@ if __name__ == '__main__':
         'mode':'train',
         'label_col':'num',
         'train':True,
+        'img:size':512,#配置用来做数据集输入的图片大小,一般裁剪出来的图片都是正方形的，所以传入一个参数即可
         'dataset_class': OCT_RCNN_Dataset,
         'model_class': OCT_ROI_head,
         'crop_size': 320,
-        'image_root': Path('/home/octusr3/project/data_fast/380'),
+        'image_root': Path('/home/octusr3/project/data_fast/512'),
         'map_matrix':'''[ [0  0  0  0  0  0  0  0  0  0]
                         [0  0  0  46 44 43 42 0  0  0]
                         [0  0  46 45 44 43 41 43 0  0]
@@ -43,7 +44,7 @@ if __name__ == '__main__':
                         [0  0  0  9  10 11 14 0  0  0]
                         [0  0  0  0  0  0  0  0  0  0]]''',
 
-        'arch': 'resnet50'#中间两个tag为3的点是视野盲区，无法推断
+        'arch': 'resnet50'  #中间两个tag为3的点是视野盲区，无法推断
     }
     run(config)
 

@@ -60,7 +60,6 @@ class OCT_ROI_head(nn.Module):
         #print(roi_indices.shape)
         #print(rois.shape)#重新调配维度
         indices_and_rois = torch.cat([roi_indices, rois], dim=2).to(rois.device)#注意这个rois_indice[: ,None]会升维
-        xy_indices_and_rois = indices_and_rois[:, [0, 2, 1, 4, 3]].to(rois.device)
         indices_and_rois=xy_indices_and_rois.to(rois.device,dtype=torch.float) #batch*54*4和batch*54*1进行合并
         pool = self.roi(x, indices_and_rois)#x是原始特征图，indices是组合以后的anchor
         #print(pool.shape)
@@ -87,7 +86,7 @@ class OCT_ROI_head(nn.Module):
 
     def decom_ResNet50(self):
         model=models.resnet50(pretrained=True)
-        feature=nn.Sequential(*list(model.children())[:-3])
+        feature=nn.Sequential(*list(model.children())[:-3])#适用childen方法，可以将预训练的参数带过去，
         reg_layer=nn.Sequential(#roi输出的维度是 1024*7*7
             nn.Linear(1024*7*7,4096)#输出的feature是1000,根据Resnet网络结构分析出来的维度
         )
