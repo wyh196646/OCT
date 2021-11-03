@@ -76,6 +76,8 @@ class OCT_RCNN_Dataset(Dataset):
             for tem in value:
                 valid_slice.append(key)
                 valid_position.append(tem)#valid_slice.append(len(value)*[key])已经扩充到了54点，中间包含重复值的slice
+        #应该是就把修正最终顺序的代码放在这里,valid_slice和valid_position都要按照正确顺序修正
+        
         centre_point_x=np.linspace((self.image_size/54)/2,self.image_size-(self.image_size/54)/2,54)
         centre_point_y=np.repeat(self.image_size/2,54)
         w,h=self.image_size/54,self.image_size
