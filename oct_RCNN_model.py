@@ -34,10 +34,11 @@ from torchsummary import summary
 
 class OCT_ROI_head(nn.Module):
 
-    def __init__(self, spatial_scale=16):#这里的spatial_scale直接弄错了，导致代码逻辑出现了巨大的问题，本来应该是十六分之一比较合理，这样才有向下缩小的倍数
+    def __init__(self, spatial_scale=8):#这里的spatial_scale直接弄错了，导致代码逻辑出现了巨大的问题，本来应该是十六分之一比较合理，这样才有向下缩小的倍数
         #弄成16，一下把所有的特征点都囊括进去了，所以模型就不收敛。
         super(OCT_ROI_head, self).__init__()#roi_size作为超参数进行调节
-        self.loss_fn=nn.MSELoss(reduction='none')
+        self.loss_fn=nn.MSELoss(reduction='none')#这里把下采样倍率调错了
+        
         self.feature,self.behind_layer,self.classfier=self.decom_ResNet50()
         #self.vf_pred = nn.Linear(4096, 54)
         #self.normal_init(self.vf_pred, 0, 0.01)

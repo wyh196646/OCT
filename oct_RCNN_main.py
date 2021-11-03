@@ -31,6 +31,7 @@ if __name__ == '__main__':
         'image_size':512,#配置用来做数据集输入的图片大小,一般裁剪出来的图片都是正方形的，所以传入一个参数即可
         'dataset_class': OCT_RCNN_Dataset,
         'model_class': OCT_ROI_head,
+        'have_blind_spot':False,
         'crop_size': 320,
         'image_root': Path('/home/octusr3/project/data_fast/512'),
         'map_matrix':'''[ [0  0  0  0  0  0  0  0  0  0]
