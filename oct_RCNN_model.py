@@ -37,7 +37,7 @@ class OCT_ROI_head(nn.Module):
     def __init__(self, spatial_scale=8):#这里的spatial_scale直接弄错了，导致代码逻辑出现了巨大的问题，本来应该是十六分之一比较合理，这样才有向下缩小的倍数
         #弄成16，一下把所有的特征点都囊括进去了，所以模型就不收敛。
         super(OCT_ROI_head, self).__init__()#roi_size作为超参数进行调节
-        self.loss_fn=nn.MSELoss(reduction='none')#这里把下采样倍率调错了
+        self.loss_fn=nn.MSELoss(reduction='none')
         
         self.feature,self.behind_layer,self.classfier=self.decom_ResNet50()
         #self.vf_pred = nn.Linear(4096, 54)
@@ -77,7 +77,7 @@ class OCT_ROI_head(nn.Module):
         #print(pool.shape)
         #pool=torch.reshape(pool,(pool.shape[0],512,self.roi_h_size,self.roi_w_size))# batchsize*54*512*7*7 ，这里进行维度修正
         #print(pool.size)
-        pool=self.behind_layer(pool).squeeze()
+        pool=self.behind_layer(pool).squeeze()  #pool的原本输出 batchsize*54,2048,1,1 ,后面去掉为1的
         #print('-------------------------------')
         #print(pool.size)
         vf_predicted_value = self.classfier(pool)#这里的输出维度是  (batchsize*54,output_value其实就是1)

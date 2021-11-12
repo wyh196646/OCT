@@ -22,7 +22,7 @@ if __name__ == '__main__':
         'savers_init': [('valid-loss', min),('n-valid-loss', min),('abn-valid-loss', min)],
 
         'train': True,
-        'batch_size': 128,
+        'batch_size': 512,
         'num_train_epochs': 50,
         'parallel': True,
         'dataset_class': OCTVFDataset,

@@ -31,9 +31,9 @@ def run(config, device=torch.device('cuda')):
     for fold in folds:
         print(f'task={task}, id_base={id_base}, fold={fold}')
         name = f"{task}-exp-{id_base}-fold{fold}"
-        train_df = df[(df['dataset'] != (fold - 1) % 5) & (df['dataset'] != fold)].copy().iloc[0:10]
-        valid_df=train_df
-        #valid_df = df[(df['dataset'] == (fold - 1) % 5)].copy()
+        train_df = df[(df['dataset'] != (fold - 1) % 5) & (df['dataset'] != fold)].copy()
+        #valid_df=train_df
+        valid_df = df[(df['dataset'] == (fold - 1) % 5)].copy()
         test_df = df[(df['dataset'] == fold)].copy()
 
         train_ds = dataset_class(train_df, 'train', config)
@@ -70,8 +70,8 @@ def run(config, device=torch.device('cuda')):
                 {'params': model.reg_parameters(),'lr':1e-1}
             ], weight_decay=0.01)
             #scheduler = lr_scheduler.StepLR(optimizer, step_size=10,gamma=0.1)#batch_size // 2, gamma=0.1)
-            #scheduler=lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_train_epochs, eta_min=1e-5)
-            scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min',factor=0.5, patience=2)
+            scheduler=lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_train_epochs, eta_min=1e-7)
+            #scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min',factor=0.5, patience=2)
             for epoch in range(num_train_epochs):
                 with Benchmark(f'Epoch {epoch}'):
                     records['epoch'] = epoch
@@ -109,7 +109,8 @@ def run(config, device=torch.device('cuda')):
                         temp=value
                         to_print.append(f'{key}={value:.4f}')
                     print(f'Epoch {epoch}: ' + ', '.join(to_print))
-                    scheduler.step(temp)
+                    #scheduler.step(temp)
+                    scheduler.step()
                     for saver in savers:#根据结果保存结果最好的模型，5折交叉验证，正好保证了所有的valid_dataset都有pred
                         saver.step()
 

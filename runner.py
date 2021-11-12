@@ -70,8 +70,8 @@ def run(config, device=torch.device('cuda')):
                 {'params': model.head_parameters(), 'lr': 1e-4}
             ], weight_decay=0.01)
             # optimizer = Adam(model.parameters(), lr=1e-3, weight_decay=1e-3)
-
-            scheduler = lr_scheduler.StepLR(optimizer, step_size=batch_size // 2, gamma=0.1)
+            scheduler=lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_train_epochs, eta_min=1e-7)
+            #scheduler = lr_scheduler.StepLR(optimizer, step_size=batch_size // 2, gamma=0.1)
 
             for epoch in range(num_train_epochs):
                 with Benchmark(f'Epoch {epoch}'):
@@ -131,7 +131,7 @@ def run(config, device=torch.device('cuda')):
                 with tqdm(test_dl, leave=False, file=sys.stdout) as t:
                     for batch in t:
                         img = batch['img'].to(device)
-                        y, _ = model_for_train(img)
+                        y, loss, raw_loss= model_for_train(img)
                         preds.append(y.cpu().numpy())
             preds = np.concatenate(preds, axis=0)
             preds = [str(x) for x in preds]
