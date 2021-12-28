@@ -1,6 +1,6 @@
 from operator import imod
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="3,5,6,7"
 
 
 from pathlib import Path
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
         'train': True,
         'batch_size': 512,
-        'num_train_epochs': 50,
+        'num_train_epochs': 1,
         'parallel': True,
         'dataset_class': OCTVFDataset,
         'model_class': OCTVFModel,
@@ -38,8 +38,8 @@ if __name__ == '__main__':
                         [0 0 0 1 1 1 1 0 0 0]
                         [0 0 1 1 1 1 1 1 0 0]
                         [0 1 1 1 1 1 1 1 1 0]
-                        [1 1 1 1 1 1 1 1 1 0]
-                        [1 1 1 1 1 1 1 1 1 0]
+                        [1 1 1 1 1 1 1 0 1 0]
+                        [1 1 1 1 1 1 1 0 1 0]
                         [0 1 1 1 1 1 1 1 1 0]
                         [0 0 1 1 1 1 1 1 0 0]
                         [0 0 0 1 1 1 1 0 0 0]

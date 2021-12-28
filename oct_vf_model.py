@@ -21,7 +21,7 @@ class OCTVFModel(nn.Module):
         self.net.fc = nn.Sequential(
             nn.Linear(n_out, n_out),
             nn.ReLU(),
-            nn.Linear(n_out, 54)
+            nn.Linear(n_out, 52)
         )
     
     def backbone_parameters(self):

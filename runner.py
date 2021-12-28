@@ -70,7 +70,7 @@ def run(config, device=torch.device('cuda')):
                 {'params': model.head_parameters(), 'lr': 1e-4}
             ], weight_decay=0.01)
             # optimizer = Adam(model.parameters(), lr=1e-3, weight_decay=1e-3)
-            scheduler=lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_train_epochs, eta_min=1e-7)
+            scheduler=lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_train_epochs, eta_min=1e-6)
             #scheduler = lr_scheduler.StepLR(optimizer, step_size=batch_size // 2, gamma=0.1)
 
             for epoch in range(num_train_epochs):
@@ -108,8 +108,8 @@ def run(config, device=torch.device('cuda')):
                                 abnormal_loss = loss_np[(pdp != 0) & (pdp != 1)]
                                 records['normal-valid-loss-list'].append(normal_loss)
                                 records['abnormal-valid-loss-list'].append(abnormal_loss)
-                                records['valid-y_true-list'].append([label[:, i].cpu() for i in range(54)])#单张图片测试的时候对于3,224,224必须unsequence到1,3,224,224 
-                                records['valid-y_pred-list'].append([y[:, i].cpu() for i in range(54)])#1是代表图片数量的那一维，在这里的时候就可以不这样，相当于对batch中的单张图片进行操作
+                                records['valid-y_true-list'].append([label[:, i].cpu() for i in range(52)])#单张图片测试的时候对于3,224,224必须unsequence到1,3,224,224 
+                                records['valid-y_pred-list'].append([y[:, i].cpu() for i in range(52)])#1是代表图片数量的那一维，在这里的时候就可以不这样，相当于对batch中的单张图片进行操作
                     to_print = []
                     for processor in processors:
                         key, value = processor(records)

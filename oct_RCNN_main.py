@@ -22,7 +22,7 @@ if __name__ == '__main__':
         'id_base': 'pid',
         'processors': [train_loss, valid_loss], 
         'savers_init': [('valid-loss', min)],
-        'batch_size': 128,#batch_size勉强调到64才可以用，不会爆内存了
+        'batch_size': 128,#batch_size勉强调到64才可以用，不会爆内存了,后面卡升级了
         'num_train_epochs': 50,
         'parallel': True,
         'mode':'train',
